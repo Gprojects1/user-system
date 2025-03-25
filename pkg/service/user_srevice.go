@@ -36,11 +36,14 @@ func (s *UserService) UpdateUser(idString string, req *dto.UpdateUserRequest) (*
 	}
 
 	exUser, err := s.UserRepo.FindById(uint(id))
+	if err != nil {
+		return &model.User{}, err
+	}
 	user := &model.User{Email: req.Email, Role: exUser.Role, Password: exUser.Password, Model: exUser.Model}
-	s.UserRepo.DeleteById(uint(id))
-	s.UserRepo.Save(user)
-
-	return user, nil
+	if err = s.UserRepo.DeleteById(uint(id)); err != nil {
+		return &model.User{}, err
+	}
+	return s.UserRepo.Save(user)
 }
 
 func (s *UserService) AddUser(user *model.User) (*model.User, error) {

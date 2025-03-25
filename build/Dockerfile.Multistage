@@ -1,0 +1,17 @@
+FROM golang:1.21 AS dependencies
+WORKDIR /go/src/user-system
+COPY go.mod go.sum ./
+RUN go mod download
+
+FROM dependencies AS build
+COPY . .
+RUN go build -o user-system ./cmd/main.go
+
+FROM debian:bookworm-slim
+WORKDIR /app
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /go/src/user-system/user-system /app/
+COPY --from=build /go/src/user-system/scripts/wait-for-it.sh /app/
+RUN chmod +x /app/wait-for-it.sh
+EXPOSE 8080/tcp
+CMD ["/app/user-system"]

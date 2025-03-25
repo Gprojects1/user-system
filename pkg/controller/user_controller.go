@@ -20,7 +20,7 @@ type userController struct {
 	UserService service.UserService
 }
 
-func (con *userController) AddBarReview(c *gin.Context) {
+func (con *userController) AddUser(c *gin.Context) {
 	var user model.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {

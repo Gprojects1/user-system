@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  user-system:
+    build:
+      context: ../.
+      dockerfile: build/Dockerfile.Multistage
+    image: user-system:latest
+    links:
+      - dbPgsql:dbPgsql
+    volumes:
+      - ../configs/user-system.yaml:/etc/user-system.yaml
+    depends_on:
+      - "dbPgsql"
+    command: ["/app/wait-for-it.sh", "dbPgsql:5432", "--", "/app/user-system"]
+
+  dbPgsql: 
+    image: postgres:14 
+    restart: always
+    ports:
+      - "5432:5432" 
+    volumes:
+      - db_data:/var/lib/postgresql/data 
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: "love"
+      POSTGRES_DB: user-service-db
